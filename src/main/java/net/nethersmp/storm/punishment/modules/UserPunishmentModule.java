@@ -152,7 +152,7 @@ public class UserPunishmentModule implements Module<Void> {
                     if (punishmentType.isBan()) {
                         target.kick(buildBanMessage(theirLoss));
                     }
-                    sender.sendRichMessage("<gray>Their <yellow>%s</yellow> will expire on: <green>%s</green>".formatted(type.toLowerCase(),
+                    sender.sendRichMessage("<gray>Their <yellow>%s</yellow> will expiry on: <green>%s</green>".formatted(type.toLowerCase(),
                             new Date(future)));
                     return Command.SINGLE_SUCCESS;
                 }))

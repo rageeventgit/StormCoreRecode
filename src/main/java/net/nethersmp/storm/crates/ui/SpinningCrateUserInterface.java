@@ -63,6 +63,7 @@ public class SpinningCrateUserInterface extends Gui {
             Player player = (Player) event.getPlayer();
             spin(player);
         });
+
         setCloseGuiAction(event -> {
             if (task == null) return;
             task.cancel();

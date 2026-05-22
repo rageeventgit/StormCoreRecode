@@ -1,6 +1,5 @@
 package net.nethersmp.storm;
 
-import io.papermc.paper.plugin.lifecycle.event.LifecycleEventManager;
 import lombok.Getter;
 import lombok.SneakyThrows;
 import net.nethersmp.storm.listeners.PlayerEvents;
@@ -13,7 +12,6 @@ import net.nethersmp.storm.user.UserDataAccessor;
 import net.nethersmp.storm.user.UserDataModifier;
 import net.nethersmp.storm.user.storage.UserDataStore;
 import org.bukkit.Bukkit;
-import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
 
 public final class StormPlugin extends JavaPlugin {
@@ -42,8 +40,6 @@ public final class StormPlugin extends JavaPlugin {
 
         ModuleLoader moduleLoader = moduleRegistry.getModuleLoader();
 
-        LifecycleEventManager<Plugin> pluginLifecycleEventManager = getLifecycleManager();
-
         moduleLoader.init();
 
         moduleLoaderTaskId = getServer().getScheduler().scheduleSyncRepeatingTask(this, () -> {
@@ -56,7 +52,6 @@ public final class StormPlugin extends JavaPlugin {
                 getLogger().info("Modules loaded. States: " + moduleLoader.states());
                 if (!moduleLoader.warnings().isEmpty()) getLogger().warning("Warnings: " + moduleLoader.warnings());
                 if (!moduleLoader.reasons().isEmpty()) getLogger().warning("Reasons: " + moduleLoader.reasons());
-
 
                 moduleRegistry.registerCommands();
             }

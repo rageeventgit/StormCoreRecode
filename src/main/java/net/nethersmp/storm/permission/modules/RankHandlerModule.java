@@ -6,13 +6,11 @@ import io.papermc.paper.command.brigadier.argument.ArgumentTypes;
 import io.papermc.paper.command.brigadier.argument.resolvers.selector.PlayerSelectorArgumentResolver;
 import io.papermc.paper.event.player.AsyncChatEvent;
 import lombok.RequiredArgsConstructor;
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.minimessage.MiniMessage;
-import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import net.nethersmp.storm.StormPlugin;
 import net.nethersmp.storm.module.api.Module;
 import net.nethersmp.storm.module.api.Result;
 import net.nethersmp.storm.permission.UserRank;
+import net.nethersmp.storm.permission.chat.UserRankChatRenderer;
 import net.nethersmp.storm.punishment.UserPunishment;
 import net.nethersmp.storm.punishment.UserPunishmentAccessor;
 import net.nethersmp.storm.user.data.UserDataType;
@@ -53,6 +51,7 @@ public class RankHandlerModule implements Module<Void> {
 
     private final ConcurrentHashMap<UUID, PermissionAttachment> rankAttachments = new ConcurrentHashMap<>();
 
+
     @Override
     public String id() {
         return ID;
@@ -70,6 +69,8 @@ public class RankHandlerModule implements Module<Void> {
 
     @Override
     public Result<Void> load() {
+        UserRankChatRenderer rankChatRenderer = new UserRankChatRenderer(rankLoader);
+
         events.listen(id(), PlayerJoinEvent.class, event -> {
             Player player = event.getPlayer();
 
@@ -86,28 +87,12 @@ public class RankHandlerModule implements Module<Void> {
             if (event.isCancelled()) return;
             event.setCancelled(true);
             Player player = event.getPlayer();
-            Component message = event.message();
 
             Optional<UserPunishment> userPunishment = UserPunishmentAccessor.get(player.getUniqueId());
             if (userPunishment.isPresent() && !userPunishment.get().duration().isOver())
                 return;
 
-            getUserRank(player).ifPresent(userRank -> {
-                String prefix = userRank.prefix();
-
-                if (!prefix.isEmpty())
-                    prefix = prefix + " ";
-
-                prefix = prefix + player.getName();
-
-                String rankId = UserDataType.RANK.get(player.getUniqueId());
-                String rankText = "<" + userRank.getColor() + ">" + prefix + "<" + userRank.getEndColor() + ">";
-                String oldMessageString = PlainTextComponentSerializer.plainText().serialize(message);
-                String colonColor = "<" + ("MEMBER".equals(rankId) ? "dark_gray" : "white") + ">";
-                Component updatedMessage = MiniMessage.miniMessage().deserialize(rankText + colonColor + ": " + oldMessageString);
-                event.viewers().forEach(viewer -> viewer.sendMessage(updatedMessage));
-            });
-
+            event.renderer(rankChatRenderer);
         });
 
         commands.register(literal("rank").requires(source -> source.getSender().hasPermission("stormcore.rank"))

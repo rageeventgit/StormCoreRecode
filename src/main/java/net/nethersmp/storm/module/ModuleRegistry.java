@@ -12,8 +12,11 @@ import net.nethersmp.storm.permission.modules.RankHandlerModule;
 import net.nethersmp.storm.permission.modules.RankLoaderModule;
 import net.nethersmp.storm.permission.modules.UserPermissionsModule;
 import net.nethersmp.storm.punishment.modules.UserPunishmentModule;
+import net.nethersmp.storm.tpa.modules.TeleportRequestModule;
 import net.nethersmp.storm.utilities.modules.CommandsModule;
 import net.nethersmp.storm.utilities.modules.ListenerModule;
+import net.nethersmp.storm.voucher.modules.VoucherLoaderModule;
+import net.nethersmp.storm.voucher.modules.VoucherManagerModule;
 
 import java.lang.reflect.Field;
 
@@ -71,6 +74,36 @@ public class ModuleRegistry {
                         access.require(ListenerModule.ID, ListenerModule.class),
                         plugin.getDataPath().resolve("crates.json"))
         ));
+
+        moduleLoader.register(new ModuleDefinition<>(
+                VoucherLoaderModule.ID,
+                VoucherLoaderModule.DEPENDENCIES,
+                VoucherLoaderModule.PRIORITY,
+                access -> new VoucherLoaderModule(
+                        plugin.getDataPath().resolve("vouchers.json"))
+        ));
+        moduleLoader.register(new ModuleDefinition<>(
+                VoucherManagerModule.ID,
+                VoucherManagerModule.DEPENDENCIES,
+                VoucherManagerModule.PRIORITY,
+                access -> new VoucherManagerModule(
+                        access.require(VoucherLoaderModule.ID, VoucherLoaderModule.class),
+                        access.require(CommandsModule.ID, CommandsModule.class),
+                        access.require(ListenerModule.ID, ListenerModule.class))
+        ));
+        moduleLoader.register(
+                new ModuleDefinition<>(
+                        TeleportRequestModule.ID,
+                        TeleportRequestModule.DEPENDENCIES,
+                        TeleportRequestModule.PRIORITY,
+                        access -> new TeleportRequestModule(
+                                plugin,
+                                access.require(CooldownModule.ID, CooldownModule.class),
+                                access.require(CommandsModule.ID, CommandsModule.class),
+                                access.require(ListenerModule.ID, ListenerModule.class)
+                        )
+                )
+        );
     }
 
 
